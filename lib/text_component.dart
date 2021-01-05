@@ -1,10 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class TextComponent extends StatefulWidget {
   TextComponent(this.sendMessage);
 
-  Function(String) sendMessage;
+  final Function({String text, File image}) sendMessage;
 
   @override
   _TextComponentState createState() => _TextComponentState();
@@ -22,7 +25,11 @@ class _TextComponentState extends State<TextComponent> {
         children: <Widget>[
           IconButton(
               icon: Icon(Icons.photo_camera),
-              onPressed: () {}
+              onPressed: () async {
+                final File image = await ImagePicker.pickImage(source: ImageSource.camera);
+                if (image == null) return;
+                widget.sendMessage(image: image);
+              }
           ),
           Expanded(
               child: TextField(
@@ -36,7 +43,7 @@ class _TextComponentState extends State<TextComponent> {
                   });
                 },
                 onSubmitted: (text) {
-                  widget.sendMessage(text);
+                  widget.sendMessage(text: text);
                   _resetText();
                 },
               )
@@ -44,7 +51,7 @@ class _TextComponentState extends State<TextComponent> {
           IconButton(
               icon: Icon(Icons.send),
               onPressed: _hasText ? () {
-                widget.sendMessage(_textController.text);
+                widget.sendMessage(text: _textController.text);
                 _resetText();
               } : null
           )
