@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_firebase_chat/text_component.dart';
 
@@ -14,7 +15,11 @@ class _ChatPageState extends State<ChatPage> {
         title: Text("Hi"),
         elevation: 0,
       ),
-      body: TextComponent(),
+      body: TextComponent(_sendMessage),
     );
+  }
+
+  void _sendMessage(String text) {
+    Firestore.instance.collection("messages").add({"text": text});
   }
 }
