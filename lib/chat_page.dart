@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_firebase_chat/message_component.dart';
 import 'package:flutter_app_firebase_chat/text_component.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -51,9 +52,7 @@ class _ChatPageState extends State<ChatPage> {
                         itemCount: documents.length,
                         reverse: true,
                         itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(documents[index].data["text"]),
-                          );
+                          return MessageComponent(documents[index].data, true);
                         }
                       );
                   }
