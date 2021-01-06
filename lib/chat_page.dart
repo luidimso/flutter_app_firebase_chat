@@ -17,12 +17,15 @@ class _ChatPageState extends State<ChatPage> {
   final GlobalKey<ScaffoldState> _scaffold = GlobalKey<ScaffoldState>();
   final GoogleSignIn signin = GoogleSignIn();
   FirebaseUser _user;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     FirebaseAuth.instance.onAuthStateChanged.listen((event) {
-      _user = event;
+      setState(() {
+        _user = event;
+      });
     });
   }
 
@@ -31,14 +34,30 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       key: _scaffold,
       appBar: AppBar(
-        title: Text("Hi"),
+        title: Text(_user != null ? "Hi, ${_user.displayName}" : "Chat App"),
+        centerTitle: true,
         elevation: 0,
+        actions: <Widget>[
+          _user != null ?
+              IconButton(
+                  icon: Icon(Icons.exit_to_app),
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    signin.signOut();
+                    _scaffold.currentState.showSnackBar(
+                        SnackBar(
+                          content: Text("You success logout!")
+                        )
+                    );
+                  }
+              ) : Container()
+        ],
       ),
       body: Column(
         children: <Widget>[
           Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: Firestore.instance.collection("messages").snapshots(),
+                stream: Firestore.instance.collection("messages").orderBy("time").snapshots(),
                 builder: (context, snapshot) {
                   switch(snapshot.connectionState) {
                     case ConnectionState.none:
@@ -52,13 +71,14 @@ class _ChatPageState extends State<ChatPage> {
                         itemCount: documents.length,
                         reverse: true,
                         itemBuilder: (context, index) {
-                          return MessageComponent(documents[index].data, true);
+                          return MessageComponent(documents[index].data, documents[index].data["uid"] == _user?.uid);
                         }
                       );
                   }
                 }
               )
           ),
+          _isLoading ? LinearProgressIndicator() : Container(),
           TextComponent(_sendMessage)
         ],
       ),
@@ -80,7 +100,8 @@ class _ChatPageState extends State<ChatPage> {
     Map <String, dynamic> data = {
       "uid": user.uid,
       "name": user.displayName,
-      "profile": user.photoUrl
+      "profile": user.photoUrl,
+      "time": Timestamp.now()
     };
 
     if(text != null) {
@@ -89,9 +110,15 @@ class _ChatPageState extends State<ChatPage> {
 
     if(image != null) {
       StorageUploadTask task = FirebaseStorage.instance.ref().child(DateTime.now().millisecondsSinceEpoch.toString()).putFile(image);
+      setState(() {
+        _isLoading = true;
+      });
       StorageTaskSnapshot snapshot = await task.onComplete;
       String url = await snapshot.ref.getDownloadURL();
       data["image"] = url;
+      setState(() {
+        _isLoading = false;
+      });
     }
 
     Firestore.instance.collection("messages").add(data);
