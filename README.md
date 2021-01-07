@@ -1,16 +1,11 @@
-# flutter_app_firebase_chat
+## Important commands
 
-A new Flutter application.
+Generate SHA1 key on Windows
 
-## Getting Started
+`keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android`
 
-This project is a starting point for a Flutter application.
+Generate SHA1 key on Linux or Mac
 
-A few resources to get you started if this is your first Flutter project:
+`keytool -list -v -alias androiddebugkey -keystore ~/.android/debug.keystore -storepass android -keypass android`
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+These commands must be running on bin folder on Java Home directory. To find Java Home directory on Mac, run `/usr/libexec/java_home`.
